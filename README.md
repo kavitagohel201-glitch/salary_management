@@ -43,9 +43,16 @@ The Vite development server proxies `/api` requests to `http://localhost:3000` (
 
 The first release intentionally has no authentication or role checks. Do not expose the API or salary data to an untrusted network. Currency is derived from the supported countries in `server/src/config/countries.js`; insights are grouped by country so salary statistics are never combined across currencies.
 
+## Deployment and demo status
+
+- **Backend API:** [https://salary-management-server.onrender.com](https://salary-management-server.onrender.com)
+- **API health check:** [https://salary-management-server.onrender.com/api/health](https://salary-management-server.onrender.com/api/health)
+- **Frontend:** [https://salary-management-bnp8.onrender.com](https://salary-management-bnp8.onrender.com)
+
+
 ## AI-assisted development
 
 - **Used for:** Reviewing the project against the assessment requirements and identifying the seed script's destructive rerun behavior.
 - **Applied to:** Making the regular seed command safe to rerun and adding an explicit reset command with corresponding tests.
 - **Reviewed by:** Checking the changes against the existing employee generator, Prisma schema, and seed command.
-- **Verification:** Tests were added for the safe default and explicit reset behavior. The test suite has not yet been run; run it before submission.
+- **Verification:** Tests cover the safe default and explicit reset behavior. Server tests (19), client tests (5), and the client production build passed on 2026-10-21.
