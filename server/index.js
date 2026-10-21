@@ -1,31 +1,38 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const pool = require('./db');
+const app = require('./src/app');
+const prisma = require('./src/db/prisma');
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const port = Number(process.env.PORT || 3000);
+let server;
 
-app.get('/api/items', async (req, res) => {
-  try {
-    const { rows } = await pool.query('SELECT * FROM items ORDER BY id DESC');
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+async function start() {
+  await prisma.$connect();
+  server = app.listen(port, () => {
+    console.log(`Salary management API listening on port ${port}`);
+  });
+}
+
+async function shutdown(signal) {
+  console.log(`${signal} received; shutting down API.`);
+  if (server) {
+    await new Promise((resolve, reject) => {
+      server.close((error) => (error ? reject(error) : resolve()));
+    });
   }
+  await prisma.$disconnect();
+}
+
+start().catch(async (error) => {
+  console.error('Failed to start API. Check DATABASE_URL and database migrations.', error);
+  await prisma.$disconnect();
+  process.exitCode = 1;
 });
 
-app.post('/api/items', async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      'INSERT INTO items (name) VALUES ($1) RETURNING *',
-      [req.body.name]
-    );
-    res.status(201).json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.listen(process.env.PORT, () => console.log('Server running'));
+process.once('SIGINT', () => shutdown('SIGINT').catch((error) => {
+  console.error('Failed to shut down cleanly:', error);
+  process.exitCode = 1;
+}));
+process.once('SIGTERM', () => shutdown('SIGTERM').catch((error) => {
+  console.error('Failed to shut down cleanly:', error);
+  process.exitCode = 1;
+}));
