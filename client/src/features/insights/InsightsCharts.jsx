@@ -13,6 +13,7 @@ import { formatCurrency } from '../../utils/currency'
 export default function InsightsCharts({
   chartGroups,
   distributionChart,
+  countryHeadcounts,
   groupLoading,
   distributionLoading,
   insightTab,
@@ -24,7 +25,7 @@ export default function InsightsCharts({
         <div className="panel-heading">
           <div><p className="eyebrow">COMPENSATION</p><h2>Average and median by {insightTab === 'department' ? 'department' : 'job title'}</h2></div>
         </div>
-        {groupLoading ? <p className="chart-state">Loading salary chart…</p> : !chartGroups.length ? <p className="chart-state">No matching insight data.</p> : (
+        {!insightCountry ? <p className="chart-state">Select a country to compare average and median salaries. Each country uses a different local currency.</p> : groupLoading ? <p className="chart-state">Loading salary chart…</p> : !chartGroups.length ? <p className="chart-state">No matching insight data.</p> : (
           <ResponsiveContainer width="100%" height={290}>
             <BarChart data={chartGroups} margin={{ top: 12, right: 12, bottom: 58, left: 8 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -40,13 +41,23 @@ export default function InsightsCharts({
             </BarChart>
           </ResponsiveContainer>
         )}
-        <p className="panel-footnote">{insightCountry ? `Values use ${insightCountry}’s currency.` : 'Amounts remain in local currencies; choose a country to compare groups consistently.'}</p>
+        <p className="panel-footnote">{insightCountry ? `Values use ${insightCountry}’s currency.` : 'Salary comparisons are available after choosing a country.'}</p>
       </article>
       <article className="panel chart-panel">
         <div className="panel-heading">
-          <div><p className="eyebrow">SALARY MIX</p><h2>Salary distribution</h2></div>
+          <div><p className="eyebrow">{insightCountry ? 'SALARY MIX' : 'WORKFORCE'}</p><h2>{insightCountry ? 'Salary distribution' : 'Employees by country'}</h2></div>
         </div>
-        {distributionLoading ? <p className="chart-state">Loading distribution…</p> : !distributionChart.length ? <p className="chart-state">No salary data yet.</p> : (
+        {!insightCountry ? !countryHeadcounts.length ? <p className="chart-state">No country data yet.</p> : (
+          <ResponsiveContainer width="100%" height={290}>
+            <BarChart data={countryHeadcounts} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" allowDecimals={false} />
+              <YAxis type="category" dataKey="country" width={92} tick={{ fontSize: 10 }} />
+              <Tooltip formatter={(value) => [`${value.toLocaleString()} employees`, 'Headcount']} />
+              <Bar dataKey="headcount" name="Employees" fill="#709b7d" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : distributionLoading ? <p className="chart-state">Loading distribution…</p> : !distributionChart.length ? <p className="chart-state">No salary data yet.</p> : (
           <ResponsiveContainer width="100%" height={290}>
             <BarChart data={distributionChart} margin={{ top: 12, right: 12, bottom: 58, left: 8 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -57,6 +68,7 @@ export default function InsightsCharts({
             </BarChart>
           </ResponsiveContainer>
         )}
+        {!insightCountry && <p className="panel-footnote">Select a country to see salary bands in its local currency.</p>}
       </article>
     </section>
   )

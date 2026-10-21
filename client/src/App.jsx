@@ -340,7 +340,7 @@ function App() {
                 <label className="compact-select-label">
                   <span className="sr-only">Distribution country</span>
                   <select value={activeInsightCountry} onChange={(event) => setInsightCountry(event.target.value)}>
-                    <option value="">All countries</option>
+                    {/* <option value="">All countries</option> */}
                     {filterOptions.countries.map((country) => <option key={country}>{country}</option>)}
                   </select>
                 </label>
@@ -366,7 +366,7 @@ function App() {
               <label className="compact-select-label">
                 <span className="sr-only">Limit insights to country</span>
                 <select value={activeInsightCountry} onChange={(event) => setInsightCountry(event.target.value)}>
-                  <option value="">All countries</option>
+                  {/* <option value="">All countries</option> */}
                   {filterOptions.countries.map((country) => <option key={country}>{country}</option>)}
                 </select>
               </label>
@@ -400,6 +400,7 @@ function App() {
             <InsightsCharts
               chartGroups={chartGroups}
               distributionChart={distributionChart}
+              countryHeadcounts={countryInsights.map((item) => ({ country: item.country, headcount: item.headcount }))}
               groupLoading={groupInsightsQuery.isLoading}
               distributionLoading={distributionQuery.isLoading}
               insightTab={insightTab}
@@ -415,7 +416,7 @@ function App() {
             <div className="toolbar">
               <EmployeeSearchBox key={location.key} initialValue={filters.search} onSearch={updateSearch} />
               <span className="filter-label">{filterCount ? `${filterCount} filter${filterCount === 1 ? '' : 's'} active` : 'Filter by'}</span>
-              <label><span className="sr-only">Filter by country</span><select value={filters.country} onChange={(event) => updateFilter('country', event.target.value)}><option value="">All countries</option>{filterOptions.countries.map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label><span className="sr-only">Filter by country</span><select value={filters.country} onChange={(event) => updateFilter('country', event.target.value)}>{filterOptions.countries.map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className="sr-only">Filter by department</span><select value={filters.department} onChange={(event) => updateFilter('department', event.target.value)}><option value="">All departments</option>{filterOptions.departments.map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className="sr-only">Filter by job title</span><select value={filters.jobTitle} onChange={(event) => updateFilter('jobTitle', event.target.value)}><option value="">All job titles</option>{filterOptions.jobTitles.map((item) => <option key={item}>{item}</option>)}</select></label>
               {filterCount > 0 && <button className="clear-filters" type="button" onClick={() => {
