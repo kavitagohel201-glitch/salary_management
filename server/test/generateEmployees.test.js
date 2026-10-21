@@ -38,24 +38,48 @@ test('rejects invalid employee counts', () => {
   assert.throws(() => generateEmployees(1.5), /non-negative integer/);
 });
 
-test('truncates first and seeds exactly 10,000 employees in batches of 1,000', async () => {
+test('adds missing seed employees in batches without resetting existing data', async () => {
   const calls = [];
   const client = {
     async $executeRaw() {
       calls.push({ operation: 'truncate' });
     },
     employee: {
-      async createMany({ data }) {
-        calls.push({ operation: 'createMany', count: data.length });
+      async createMany({ data, skipDuplicates }) {
+        calls.push({ operation: 'createMany', count: data.length, skipDuplicates });
         return { count: data.length };
       },
     },
   };
 
   assert.equal(await seed(client), 10000);
+  assert.equal(calls.some(({ operation }) => operation === 'truncate'), false);
+  assert.deepEqual(calls, Array.from({ length: 10 }, () => ({
+    operation: 'createMany',
+    count: 1000,
+    skipDuplicates: true,
+  })));
+});
+
+test('resets employees only when explicitly requested', async () => {
+  const calls = [];
+  const client = {
+    async $executeRaw() {
+      calls.push({ operation: 'truncate' });
+    },
+    employee: {
+      async createMany({ data, skipDuplicates }) {
+        calls.push({ operation: 'createMany', count: data.length, skipDuplicates });
+        return { count: data.length };
+      },
+    },
+  };
+
+  assert.equal(await seed(client, { reset: true }), 10000);
   assert.deepEqual(calls[0], { operation: 'truncate' });
   assert.deepEqual(calls.slice(1), Array.from({ length: 10 }, () => ({
     operation: 'createMany',
     count: 1000,
+    skipDuplicates: true,
   })));
 });
